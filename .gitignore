@@ -1,6 +1,7 @@
 # Zig build output
 zig-out/
 
+.zig-cache
 # Temporary files
 *.tmp
 *.log
