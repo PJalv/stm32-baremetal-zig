@@ -19,15 +19,16 @@ pub fn build(b: *std.Build) void {
 
     elf.setLinkerScript(b.path("link.ld"));
 
-    const flash_cmd = b.addSystemCommand(&[_][]const u8{
-        "st-flash",
-        "write",
-        b.getInstallPath(.{ .custom = "./" }, elf.name),
-        "0x8000000",
-    });
-    const flash_step = b.step("flash", "Flash and run the app on your STM32F4Discovery");
-    flash_step.dependOn(&flash_cmd.step);
+    // const flash_cmd = b.addSystemCommand(&[_][]const u8{
+    //     "openocd", "-f", "interface/stlink.cfg", "-f", "target/stm32f4x.cfg", "-c",
+    //     b.fmt(
+    //         \\"program {s} verify reset exit"
+    //     , .{elf.name}),
+    // });
 
-    b.default_step.dependOn(&elf.step);
     b.installArtifact(elf);
+    // flash_cmd.step.dependOn(&elf.step);
+    // var flash_step = b.step("flash", "Flash and run the app on your STM32F4Discovery");
+    // b.default_step.dependOn(flash_step);
+    // flash_step.dependOn(&flash_cmd.step);
 }
