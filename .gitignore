@@ -1,0 +1,20 @@
+# Zig build output
+zig-out/
+
+# Temporary files
+*.tmp
+*.log
+
+# Editor specific files
+.DS_Store
+*.swp
+
+# Ignore firmware files
+*firmware*
+
+# Ignore object files
+*.o
+
+# Ignore ELF files
+*.elf
+
