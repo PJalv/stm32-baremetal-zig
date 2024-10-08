@@ -1,42 +1,7 @@
 const std = @import("std");
+const RCC = @import("rcc.zig").RCC;
 
 // Constants and Struct Definitions
-const rcc = extern struct {
-    CR: u32,
-    PLLCFGR: u32,
-    CFGR: u32,
-    CIR: u32,
-    AHB1RSTR: u32,
-    AHB2RSTR: u32,
-    AHB3RSTR: u32,
-    RESERVED0: u32,
-    APB1RSTR: u32,
-    APB2RSTR: u32,
-    RESERVED1L: u32,
-    RESERVED1H: u32,
-    AHB1ENR: u32,
-    AHB2ENR: u32,
-    AHB3ENR: u32,
-    RESERVED2: u32,
-    APB1ENR: u32,
-    APB2ENR: u32,
-    RESERVED3L: u32,
-    RESERVED3H: u32,
-    AHB1LPENR: u32,
-    AHB2LPENR: u32,
-    AHB3LPENR: u32,
-    RESERVED4: u32,
-    APB1LPENR: u32,
-    APB2LPENR: u32,
-    RESERVED5L: u32,
-    RESERVED5H: u32,
-    BDCR: u32,
-    CSR: u32,
-    RESERVED6H: u32,
-    RESERVEDK: u32,
-    SSCGR: u32,
-    PLLI2SCFGR: u32,
-};
 
 const gpio = extern struct {
     MODER: u32,
@@ -123,7 +88,6 @@ const UART3: *volatile uart = @ptrFromInt(0x40004800);
 
 const SYSTICK: *volatile systick = @ptrFromInt(0xe000e010);
 const GPIOB: *volatile gpio = @ptrFromInt(0x40020400);
-const RCC: *volatile rcc = @ptrFromInt(0x40023800);
 
 const GPIO_MODE = enum(u3) { INPUT, OUTPUT, AF, ANALOG };
 
@@ -213,7 +177,6 @@ inline fn PIN(comptime bank: u32, comptime num: u32) u16 {
     const pin_value = ((bank - 'A') << 8) | num;
     return pin_value;
 }
-
 // Main Function
 pub fn main() void {
     systick_init(16_000_000 / 1000);
@@ -228,8 +191,7 @@ pub fn main() void {
         if (timer_expired(&timer, period, @as(*volatile u32, @ptrCast(&counter)).*)) {
             gpio_write(led, on);
             on = !on;
-            const message: []const u8 = "HELLO FROM ZIG OMG\r\n";
-            uart_write_buf(UART3, message);
+            uart_write_buf(UART3, "HELLO FROM ZIG OMG\r\n");
         }
     }
 }
