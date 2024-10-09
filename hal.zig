@@ -31,13 +31,13 @@ pub const rcc = extern struct {
     SSCGR: u32,
     PLLI2SCFGR: u32,
 };
+
 pub const FREQ = 16000000;
 
 pub const RCC: *volatile rcc = @ptrFromInt(0x40023800);
-const UART1: *volatile uart = @ptrFromInt(0x40011000);
-const UART2: *volatile uart = @ptrFromInt(0x40004400);
+pub const UART1: *volatile uart = @ptrFromInt(0x40011000);
+pub const UART2: *volatile uart = @ptrFromInt(0x40004400);
 pub const UART3: *volatile uart = @ptrFromInt(0x40004800);
-
 const SYSTICK: *volatile systick = @ptrFromInt(0xe000e010);
 const GPIOB: *volatile gpio = @ptrFromInt(0x40020400);
 
@@ -71,10 +71,9 @@ const uart = extern struct {
 };
 
 pub inline fn uart_init(uart_: *volatile uart, baud: u32) void {
-    // https://www.st.com/resource/en/datasheet/stm32f429zi.pdf
-    const af: u8 = 7; // Alternate function
+    const af: u8 = 7;
     var rx: u16 = 0;
-    var tx: u16 = 0; // pins
+    var tx: u16 = 0;
 
     if (uart_ == UART1)
         RCC.APB2ENR |= BIT(4);
@@ -104,8 +103,8 @@ pub inline fn uart_init(uart_: *volatile uart, baud: u32) void {
 pub inline fn uart_read_ready(uart_: *volatile uart) u32 {
     return uart_.SR & BIT(5); // If RXNE bit is set, data is ready
 }
-pub inline fn uart_read_byte(self: *volatile uart) u8 {
-    return @as(u8, self.DR & 255);
+pub inline fn uart_read_byte(uart_: *volatile uart) u8 {
+    return @as(u8, uart_.DR & 255);
 }
 
 pub inline fn uart_write_byte(uart_: *volatile uart, byte: u8) void {
@@ -113,14 +112,14 @@ pub inline fn uart_write_byte(uart_: *volatile uart, byte: u8) void {
     while ((uart_.SR & BIT(7)) == 0)
         delay_loop(1);
 }
-pub inline fn uart_write_buf(uart_: *volatile uart, buf: []const u8) void {
+pub inline fn uart_write_buf(uart_: *volatile uart, comptime buf: []const u8) void {
     for (buf) |char| {
         uart_write_byte(uart_, char);
     }
 }
 // pub inline Functions
 //
-pub inline fn gpio_set_mode(pin: u16, mode: GPIO_MODE) void {
+pub inline fn gpio_set_mode(pin: u16, comptime mode: GPIO_MODE) void {
     const gpio_: *gpio = GPIO(PINBANK(pin));
     const n: u16 = PINNO(pin);
     RCC.AHB1ENR |= BIT(PINBANK(pin));
@@ -150,7 +149,7 @@ pub inline fn gpio_read(pin: u16) bool {
     return ((idr_value & @as(u32, 1) << @as(u32, PINNO(pin))) != 0);
 }
 
-fn delay_loop(iterations: usize) void {
+fn delay_loop(comptime iterations: usize) void {
     var count: usize = iterations;
     while (count != 0) : (count -= 1) {
         asm volatile ("nop");
@@ -165,7 +164,7 @@ pub fn get_counter() u32 {
 pub fn SysTick_Handler() callconv(.C) void {
     counter += 1;
 }
-pub fn timer_expired(t: *u32, prd: u32, now: u32) bool {
+pub fn timer_expired(t: *u32, comptime prd: u32, now: u32) bool {
     if (now + prd < t.*)
         t.* = 0; // Time wrapped? Reset timer
     if (t.* == 0)
@@ -200,7 +199,7 @@ pub inline fn PINNO(pin: u16) u16 {
 }
 
 pub inline fn BIT(x: u32) u32 {
-    const bit_value = @as(c_ulong, 1) << @intCast(x);
+    const bit_value: u32 = @as(u32, 1) << @intCast(x);
     return bit_value;
 }
 
