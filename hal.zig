@@ -1,3 +1,11 @@
+pub fn sleep(iterations: usize) void {
+    var i: usize = 0;
+    const iptr: *volatile usize = &i;
+
+    while (iptr.* < iterations) {
+        iptr.* += 1;
+    }
+}
 pub const rcc = extern struct {
     CR: u32,
     PLLCFGR: u32,
@@ -139,7 +147,7 @@ pub inline fn gpio_set_af(pin: u16, af_num: u8) void {
 
 pub inline fn gpio_write(pin: u16, val: bool) void {
     const gpio_: *gpio = GPIO(PINBANK(pin));
-    const bsr_value: u32 = @as(u32, 1) << @as(u32, PINNO(pin)) << @as(u5, (if (val) 0 else 16));
+    const bsr_value: u32 = @as(u32, 1) << @intCast(PINNO(pin)) << @as(u5, (if (val) 0 else 16));
     gpio_.BSRR = bsr_value;
 }
 pub inline fn gpio_read(pin: u16) bool {
@@ -173,6 +181,13 @@ pub fn timer_expired(t: *u32, comptime prd: u32, now: u32) bool {
         return false; // Not expired yet, return
     t.* = if ((now - t.*) > prd) now + prd else t.* + prd; // Next expiration time
     return true; // Expired, return true
+}
+
+pub fn delay(time: usize) void {
+    const start = get_counter();
+
+    while (get_counter() - start < time) {}
+    return;
 }
 
 pub inline fn systick_init(comptime ticks: u32) void {
