@@ -7,5 +7,5 @@ This repository contains a baremetal programming setup for STM32 microcontroller
 - `build.zig`: Build configuration for the Zig project.
 
 ## Acknowledgments
-Major credit to the GitHub repository [bare-metal-programming-guide](https://github.com/cpq/bare-metal-programming-guide) by @cpq for providing valuable insights and resources for baremetal programming.
+Major credit to the GitHub repository [bare-metal-programming-guide](https://github.com/cpq/bare-metal-programming-guide) by [@cpq](https://github.com/cpq) for providing a great resource for baremetal programming.
 
